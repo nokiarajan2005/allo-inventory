@@ -14,7 +14,7 @@ export async function POST(
   const { id } = await params;
 
   const result = await prisma.$transaction(async (tx) => {
-    const reservations = await tx.$queryRaw<
+    const reservations = await tx.$queryRaw
       {
         id: string;
         status: string;
@@ -37,14 +37,13 @@ export async function POST(
     }
 
     if (reservation.status === "CONFIRMED") {
-      return { reservation, status: 200 }; // idempotent
+      return { reservation, status: 200 };
     }
 
     if (
       reservation.status === "RELEASED" ||
       new Date(reservation.expiresAt) < new Date()
     ) {
-      // If PENDING but expired: release stock and mark as RELEASED
       if (
         reservation.status === "PENDING" &&
         new Date(reservation.expiresAt) < new Date()
@@ -70,7 +69,6 @@ export async function POST(
       return { error: "Reservation is not in a confirmable state", status: 409 };
     }
 
-    // Confirm: decrement total (permanently consume the stock) and clear reserved
     await tx.stock.update({
       where: {
         productId_warehouseId: {
@@ -108,7 +106,7 @@ export async function POST(
     productName: (result.reservation as any).product?.name,
     warehouseName: (result.reservation as any).warehouse?.name,
     quantity: result.reservation.quantity,
-    updatedAt: result.reservation.updatedAt.toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   await saveIdempotencyResult(idempotencyKey, responseBody, result.status);
