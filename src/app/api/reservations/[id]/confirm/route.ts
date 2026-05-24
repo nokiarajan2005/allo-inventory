@@ -4,14 +4,14 @@ import { checkIdempotency, saveIdempotencyResult } from "@/lib/idempotency";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const idempotencyKey = req.headers.get("Idempotency-Key");
 
   const cached = await checkIdempotency(idempotencyKey);
   if (cached) return cached;
 
-  const { id } = params;
+  const { id } = await params;
 
   const result = await prisma.$transaction(async (tx) => {
     const reservations = await tx.$queryRaw<

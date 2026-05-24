@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+{ params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+ const { id } = await params;
 
   const result = await prisma.$transaction(async (tx) => {
     const reservations = await tx.$queryRaw<
