@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkIdempotency, saveIdempotencyResult } from "@/lib/idempotency";
 
+type RawReservation = {
+  id: string;
+  status: string;
+  expiresAt: Date;
+  quantity: number;
+  productId: string;
+  warehouseId: string;
+};
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,16 +23,7 @@ export async function POST(
   const { id } = await params;
 
   const result = await prisma.$transaction(async (tx) => {
-    const reservations = await tx.$queryRaw
-      {
-        id: string;
-        status: string;
-        expiresAt: Date;
-        quantity: number;
-        productId: string;
-        warehouseId: string;
-      }[]
-    >`
+    const reservations = await tx.$queryRaw<RawReservation[]>`
       SELECT id, status, "expiresAt", quantity, "productId", "warehouseId"
       FROM "Reservation"
       WHERE id = ${id}
