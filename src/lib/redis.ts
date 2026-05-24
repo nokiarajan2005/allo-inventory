@@ -31,13 +31,14 @@ export async function acquireLock(
   ttlMs: number = 5000
 ): Promise<boolean> {
   const client = getRedis();
-  if (!client) return true; // No Redis: allow, rely on DB-level locking
+  if (!client) return true;
 
   try {
-    const result = await client.set(key, "1", "NX", "PX", ttlMs);
+    // Use object options form to avoid overload issues
+    const result = await client.set(key, "1", "EX", Math.ceil(ttlMs / 1000));
     return result === "OK";
   } catch {
-    return true; // Redis unavailable — fall through to DB locking
+    return true;
   }
 }
 
