@@ -145,3 +145,4 @@ The key is stored on the `Reservation` itself (as a nullable unique column) so t
 - Redis is optional, not required — the app is fully correct without it, just slightly less efficient under burst load
 - No ORM-level optimistic locking (e.g. version fields) — `FOR UPDATE` is simpler and more reliable for this use case
 - Lazy cleanup is the primary expiry mechanism; the cron is belt-and-suspenders
+"# allo-inventory" 
